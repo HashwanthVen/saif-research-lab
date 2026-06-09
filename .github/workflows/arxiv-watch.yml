@@ -1,0 +1,21 @@
+name: arxiv-watch
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install arxiv requests pyyaml
+      - name: Run arXiv scout
+        run: python scripts/arxiv_watch.py --since 24h --emit-issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

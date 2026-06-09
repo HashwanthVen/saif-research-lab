@@ -1,0 +1,27 @@
+{
+  "paper_id": "02-attention-sinks-gqa-swa",
+  "phase": "literature_review",
+  "last_updated": "2026-06-09T22:00:00Z",
+  "target_venue": "EMNLP 2026 Findings (via ARR Aug cycle)",
+  "target_deadline": "2026-08-03",
+  "next_actions": [
+    "Researcher: confirm no published GQA-sink characterisation exists",
+    "Researcher: pull StreamingLLM successor papers from 2025–2026",
+    "Critic: review plan.md before any GPU time"
+  ],
+  "blockers": [],
+  "scoop_alerts": [],
+  "scores": {
+    "novelty": 8,
+    "compute_feasibility": 10,
+    "venue_acceptability": 8,
+    "genuine_value": 8,
+    "solo_executability": 10,
+    "reproducibility": 10,
+    "time_to_first_submission": 9,
+    "risk_of_being_scooped": 6,
+    "learning_value_for_author": 8,
+    "weighted_total": 8.72,
+    "last_scored": "2026-06-09T22:00:00Z"
+  }
+}

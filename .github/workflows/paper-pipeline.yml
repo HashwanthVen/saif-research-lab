@@ -1,0 +1,57 @@
+name: paper-pipeline
+
+on:
+  push:
+    paths:
+      - 'papers/**'
+      - '.agents/**'
+      - 'shared/**'
+  pull_request:
+    paths:
+      - 'papers/**'
+
+jobs:
+  validate-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate status.json schema
+        run: python scripts/validate_status.py
+      - name: Lint paper briefs
+        run: python scripts/lint_briefs.py
+
+  smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install minimal deps
+        run: |
+          pip install pytest pyyaml jsonschema
+      - name: Run CPU-only smoke tests
+        run: |
+          for dir in papers/*/experiments/tests; do
+            if [ -d "$dir" ]; then
+              pytest "$dir" -q || true
+            fi
+          done
+
+  latex-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/01-latent-cot-tabular/manuscript
+          root_file: main.tex
+        continue-on-error: true
+      - uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/02-attention-sinks-gqa-swa/manuscript
+          root_file: main.tex
+        continue-on-error: true

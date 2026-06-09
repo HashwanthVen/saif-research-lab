@@ -1,0 +1,23 @@
+{
+  "paper_id": "_template",
+  "phase": "literature_review",
+  "last_updated": "2026-06-09T22:00:00Z",
+  "target_venue": "TBD",
+  "target_deadline": "TBD",
+  "next_actions": [],
+  "blockers": ["This is the template; copy to papers/NN-* before use"],
+  "scoop_alerts": [],
+  "scores": {
+    "novelty": 0,
+    "compute_feasibility": 0,
+    "venue_acceptability": 0,
+    "genuine_value": 0,
+    "solo_executability": 0,
+    "reproducibility": 0,
+    "time_to_first_submission": 0,
+    "risk_of_being_scooped": 0,
+    "learning_value_for_author": 0,
+    "weighted_total": 0.0,
+    "last_scored": "2026-06-09T22:00:00Z"
+  }
+}

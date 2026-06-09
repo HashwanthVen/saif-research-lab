@@ -1,0 +1,55 @@
+# Data — full datasets excluded; metadata + small samples committed
+papers/*/data/**
+!papers/*/data/.gitkeep
+!papers/*/data/README.md
+!papers/*/data/manifest.json
+!papers/*/data/samples/
+
+# Results — keep summary files only
+papers/*/results/runs/**/checkpoints/
+papers/*/results/runs/**/*.pt
+papers/*/results/runs/**/*.bin
+papers/*/results/runs/**/*.safetensors
+
+# Build artifacts
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.toc
+*.synctex.gz
+papers/*/manuscript/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# HF / model caches
+.cache/
+hf_cache/
+~/.cache/

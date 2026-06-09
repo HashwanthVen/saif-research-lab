@@ -1,0 +1,27 @@
+{
+  "paper_id": "01-latent-cot-tabular",
+  "phase": "literature_review",
+  "last_updated": "2026-06-09T22:00:00Z",
+  "target_venue": "TMLR",
+  "target_deadline": "rolling",
+  "next_actions": [
+    "Researcher: complete annotated bibliography with ≥ 25 sources",
+    "Researcher: confirm gap statement is robust to falsification",
+    "Critic: review plan.md before any GPU time"
+  ],
+  "blockers": [],
+  "scoop_alerts": [],
+  "scores": {
+    "novelty": 10,
+    "compute_feasibility": 10,
+    "venue_acceptability": 8,
+    "genuine_value": 9,
+    "solo_executability": 10,
+    "reproducibility": 10,
+    "time_to_first_submission": 8,
+    "risk_of_being_scooped": 5,
+    "learning_value_for_author": 9,
+    "weighted_total": 9.16,
+    "last_scored": "2026-06-09T22:00:00Z"
+  }
+}
