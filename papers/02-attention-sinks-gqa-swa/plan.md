@@ -45,13 +45,22 @@
 
 ## Compute estimates
 
-| Phase | Wall-time | VRAM |
-|-------|-----------|------|
-| Setup + quantisation | 2 h | ~6 GB peak |
-| Attention measurement (4 models × 5 lengths × 100 samples) | ~30 h | ~7 GB |
-| Retrieval correlation | ~20 h | ~7 GB |
-| Streaming test | ~12 h | ~7 GB |
-| Total | ~70 h (~3 calendar weeks) | within envelope |
+Pure 4-bit inference; no training, no backward passes. The original 70 h
+estimate was padded for worst-case attention-export overhead at 16K context.
+Realistic numbers below.
+
+| Phase | Wall-time (realistic) | Wall-time (upper bound) | VRAM |
+|-------|-----------------------|-------------------------|------|
+| Setup + 4-bit NF4 quantisation, 4 models | 1–2 h | 2–3 h | ~6 GB peak |
+| Attention export: 4 models × 5 ctx lens × 100 NIAH samples | 10–15 h | ~30 h | ~7 GB |
+| Retrieval correlation: NIAH + LongBench subtasks | 6–10 h | ~20 h | ~7 GB |
+| StreamingLLM k-sweep on PG19 | 6–10 h | ~12 h | ~7 GB |
+| **Total** | **~25–40 GPU-hrs** | **~70 GPU-hrs** | within envelope |
+
+Realistic path means ~1–2 days of unattended GPU. Upper bound (~70 h) only
+applies if sparse top-k attention export is much slower than expected at 16K
+context, in which case the experiment-runner should reduce NIAH sample count
+from 100 to 50 and surface to the orchestrator.
 
 ## Deliverable
 

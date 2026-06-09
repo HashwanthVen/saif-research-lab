@@ -52,13 +52,43 @@
 
 ## Compute estimates
 
+The total depends almost entirely on whether Dudley & Oymak (2026) have released
+their pretrained CoT-variant NanoTabPFN checkpoint. **The researcher agent must
+resolve this in week 1** before the experiment-runner commits to a path.
+
+### Best case — pretrained CoT checkpoint available on HF
+
+Pure inference + lightweight probing. NanoTabPFN is in-context, so per-task
+prediction is seconds, not minutes.
+
 | Phase | Wall-time | VRAM |
 |-------|-----------|------|
 | Setup smoke | 1 h | < 2 GB |
-| Baselines (4 conditions × 3 seeds × 30 tasks) | ~30 h | 4–6 GB |
-| Probing | 8 h | < 2 GB |
-| Ablations | ~24 h | 4–6 GB |
-| Total | ~63 h | well within envelope |
+| Inference: 30 TabArena tasks × 4 conditions × 3 seeds | 2–6 h | 2–4 GB |
+| Cache scratchpad activations | 1–3 h | 2–4 GB |
+| Train linear probes (could run on CPU) | < 1 h | < 1 GB |
+| k-sweep (k ∈ {0,2,4,8,16}) | 2–4 h | 2–4 GB |
+| Token-dropout ablation | 1–2 h | 2–4 GB |
+| **Best-case total** | **~8–15 GPU-hrs** | well within envelope |
+
+### Worst case — must retrain base + variants from scratch
+
+| Phase | Wall-time | VRAM |
+|-------|-----------|------|
+| Setup smoke | 1 h | < 2 GB |
+| Pretrain NanoTabPFN base | 8–20 h | 4–6 GB |
+| Pretrain 3 architectural variants (CoT-k=4, deep-no-CoT, looped) | 24–60 h | 4–6 GB |
+| Inference + probing as above | 8–15 h | 2–4 GB |
+| **Worst-case total** | **~40–95 GPU-hrs** | well within envelope |
+
+### Decision gate
+
+If the CoT checkpoint exists → best case applies; full experimental program
+finishes in a weekend.
+
+If it does not exist → escalate to the human before committing to the
+worst-case 95-hour path. Consider whether the question can be answered with
+LoRA fine-tuning of the base NanoTabPFN checkpoint instead of full retraining.
 
 ## Deliverable
 
