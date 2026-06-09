@@ -62,3 +62,7 @@ If the dry forward exceeds 11 GB allocated, abort the run and surface a `vram_oo
 - Per experiment: ≤ 24 h
 - Per paper: ≤ 168 GPU-hours / week
 - If a configuration needs more, the experiment-runner must surface to the orchestrator with a justification before starting.
+
+## Cloud GPU fallback
+
+GitHub Codespaces has **no GPU** (verified June 2026 against your account — only 2/4/8/16/32-core CPU tiers). If the local RTX 4070 is unavailable, see `shared/cloud-gpu.md` for vetted alternatives (Kaggle free tier, Vast.ai 4090 spot, RunPod on-demand, Modal serverless).

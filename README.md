@@ -97,6 +97,7 @@ The orchestrator picks up any new `papers/NN-*` folder automatically.
 
 - GPU: NVIDIA RTX 4070 (12 GB VRAM, Ada Lovelace)
 - See `shared/compute-envelope.md` for the exact model-size / training-mode envelope every agent must respect.
+- See `shared/cloud-gpu.md` for cloud GPU fallback options when the local 4070 is unavailable (Codespaces has no GPU; verified June 2026).
 
 ## License
 
