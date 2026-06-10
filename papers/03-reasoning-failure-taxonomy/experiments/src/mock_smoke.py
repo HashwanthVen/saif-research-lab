@@ -1,9 +1,33 @@
-"""Cross-platform deterministic evaluation runner for Paper 03.
+"""SMOKE-ONLY deterministic mock runner for Paper 03.
 
-This mirrors the PowerShell runner's determinism contract while using only the
-Python standard library. It writes one JSON record per prompt/model/seed work
-item, including failures and timeouts, so --resume never retries the same failed
-work item forever.
+==============================================================================
+WARNING — THIS SCRIPT IS NOT THE CANONICAL EVALUATION RUNNER.
+
+All REAL model evaluation for Paper 03 MUST go through:
+
+    papers/03-reasoning-failure-taxonomy/experiments/scripts/eval_runner.ps1
+
+That PowerShell runner is the deterministic, idempotent, resumable harness
+that talks to the GitHub Copilot CLI on the author's Windows host. It is the
+single source of truth for the determinism contract (see HANDOFF.md § 3) and
+the only path whose outputs may appear in `results/runs/` for the manuscript.
+
+This Python module exists ONLY to:
+  1. Provide a cross-platform smoke test of the work-id / build-plan / resume
+     / record-schema logic on CI hosts that have neither PowerShell nor the
+     `copilot` CLI installed (for example, the GitHub-hosted Linux runner).
+  2. Mirror the PowerShell runner's JSON record schema so the aggregator
+     (`aggregate_results.py`) can be unit-tested against synthetic input.
+
+It deliberately CANNOT invoke any real CLI. There is no `subprocess` import
+and no network access; every "response" is a deterministic SHA256-derived
+placeholder. Records produced by this module are clearly tagged
+(`script_version` starts with "mock_smoke.py", `response_text` starts with
+"[MOCK]") so they can never be confused with real evaluation outputs.
+
+If you are tempted to add a real-CLI path here: DON'T. Add it to the PS1
+runner instead, and update HANDOFF.md § 3.
+==============================================================================
 """
 from __future__ import annotations
 
@@ -12,22 +36,22 @@ import getpass
 import hashlib
 import json
 import platform
-import shlex
 import socket
-import subprocess
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-SCRIPT_VERSION = "eval_runner.py v1.0.0"
+SCRIPT_VERSION = "mock_smoke.py v1.0.0 (SMOKE-ONLY; canonical = eval_runner.ps1)"
 
 EXPERIMENTS_DIR = Path(__file__).resolve().parents[1]
 PAPER_DIR = EXPERIMENTS_DIR.parent
 DEFAULT_PROMPTS = EXPERIMENTS_DIR / "configs" / "prompts_sample.jsonl"
 DEFAULT_MODELS = EXPERIMENTS_DIR / "configs" / "models.json"
-DEFAULT_OUT_DIR = PAPER_DIR / "results" / "runs"
+# NOTE: the default output directory is intentionally a smoke-only subtree so
+# that mock records cannot accidentally land in the real results corpus.
+DEFAULT_OUT_DIR = PAPER_DIR / "results" / "smoke_runs"
 
 
 def iso_utc() -> str:
@@ -36,10 +60,10 @@ def iso_utc() -> str:
 
 
 def compute_work_id(prompt_id: str, cli_id: str, seed: int) -> str:
-    """Compute first 16 hex chars of SHA256(prompt_id\0cli_id\0seed).
+    """Compute first 16 hex chars of SHA256(prompt_id\\0cli_id\\0seed).
 
-    The seed is interpolated as a decimal string: seed=0 hashes as "0",
-    seed=42 hashes as "42".
+    Must stay bit-for-bit identical to the PowerShell runner's work_id formula
+    so smoke artifacts and real artifacts share an addressing scheme.
     """
     key = f"{prompt_id}\0{cli_id}\0{seed}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
@@ -110,20 +134,13 @@ def build_plan(
     return plan, skipped
 
 
-def make_cli_args(cli_command: str, prompt_arg: str, prompt_text: str, model_arg: str, cli_id: str) -> list[str]:
-    """Construct subprocess argv for one model invocation."""
-    return [*shlex.split(cli_command), prompt_arg, prompt_text, model_arg, cli_id, "--no-color"]
-
-
-def decode_output(data: bytes | str | None) -> str:
-    """Decode subprocess output that may be bytes, text, or None."""
-    if isinstance(data, bytes):
-        return data.decode("utf-8", errors="replace")
-    return data or ""
-
-
 def mock_response(work_id: str, prompt: dict[str, Any], model: dict[str, Any], seed: int) -> str:
-    """Return a clearly fake deterministic response for smoke tests."""
+    """Return a clearly fake deterministic response for smoke tests.
+
+    The leading "[MOCK]" tag and the "not a real model evaluation" footer are
+    load-bearing: any downstream tool that ingests a record produced here can
+    filter on them to refuse to treat the response as scientific evidence.
+    """
     digest = hashlib.sha256(
         f"mock\0{work_id}\0{prompt.get('prompt_text', '')}\0{model.get('cli_id')}\0{seed}".encode("utf-8")
     ).hexdigest()[:24]
@@ -140,66 +157,21 @@ def mock_response(work_id: str, prompt: dict[str, Any], model: dict[str, Any], s
 
 def invoke_once(
     *,
-    cli_command: str,
-    prompt_arg: str,
-    model_arg: str,
-    prompt_text: str,
-    cli_id: str,
-    timeout_sec: int,
-    mock: bool,
     work_id: str,
     prompt: dict[str, Any],
     model: dict[str, Any],
     seed: int,
 ) -> dict[str, Any]:
-    """Invoke the CLI once, returning captured output and timing metadata."""
+    """Produce one deterministic mock record. Never touches a real CLI."""
     started = time.monotonic()
-    if mock:
-        stdout = mock_response(work_id, prompt, model, seed)
-        return {
-            "stdout": stdout,
-            "stderr": "",
-            "exit_code": 0,
-            "timed_out": False,
-            "duration_sec": round(time.monotonic() - started, 3),
-        }
-
-    argv = make_cli_args(cli_command, prompt_arg, prompt_text, model_arg, cli_id)
-    try:
-        result = subprocess.run(
-            argv,
-            capture_output=True,
-            text=True,
-            timeout=timeout_sec,
-            check=False,
-        )
-        return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "exit_code": int(result.returncode),
-            "timed_out": False,
-            "duration_sec": round(time.monotonic() - started, 3),
-        }
-    except subprocess.TimeoutExpired as exc:
-        stdout = decode_output(exc.stdout)
-        stderr = (decode_output(exc.stderr) + f"\nTIMEOUT after {timeout_sec} s").strip()
-        return {
-            "stdout": stdout,
-            "stderr": stderr,
-            "exit_code": -9,
-            "timed_out": True,
-            "duration_sec": round(time.monotonic() - started, 3),
-        }
-    except (OSError, ValueError, RuntimeError) as exc:
-        # Robustness is intentional: the runner must persist a record for local
-        # invocation failures so --resume cannot retry a broken tuple forever.
-        return {
-            "stdout": "",
-            "stderr": f"{type(exc).__name__}: {exc}",
-            "exit_code": 127,
-            "timed_out": False,
-            "duration_sec": round(time.monotonic() - started, 3),
-        }
+    stdout = mock_response(work_id, prompt, model, seed)
+    return {
+        "stdout": stdout,
+        "stderr": "",
+        "exit_code": 0,
+        "timed_out": False,
+        "duration_sec": round(time.monotonic() - started, 3),
+    }
 
 
 def build_record(
@@ -207,11 +179,12 @@ def build_record(
     result: dict[str, Any],
     started_at: str,
     finished_at: str,
-    cli_command: str,
-    prompt_arg: str,
-    model_arg: str,
 ) -> dict[str, Any]:
-    """Build JSON record with the PowerShell schema plus python_version."""
+    """Build JSON record with the PowerShell schema plus python_version.
+
+    The `cli_invocation` field is intentionally a synthetic marker rather than
+    a real command line, so the record is self-describing as smoke output.
+    """
     prompt = item["prompt"]
     model = item["model"]
     cli_id = str(model.get("cli_id", ""))
@@ -233,7 +206,7 @@ def build_record(
         "duration_sec": result["duration_sec"],
         "started_at": started_at,
         "finished_at": finished_at,
-        "cli_invocation": f"{cli_command} {prompt_arg} <prompt> {model_arg} {cli_id} --no-color",
+        "cli_invocation": "MOCK (no CLI invoked; canonical runner is eval_runner.ps1)",
         "machine": socket.gethostname() or platform.node(),
         "user": getpass.getuser(),
         "python_version": platform.python_version(),
@@ -242,7 +215,7 @@ def build_record(
 
 
 def write_json(path: Path, record: dict[str, Any]) -> None:
-    """Atomically-enough write one JSON record for this harness."""
+    """Write one JSON record."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, indent=2, sort_keys=False) + "\n", encoding="utf-8")
 
@@ -267,27 +240,27 @@ def append_progress(log_file: Path, item: dict[str, Any], status: str) -> None:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments."""
-    ap = argparse.ArgumentParser(description="Deterministic cross-platform Copilot CLI evaluation runner.")
+    """Parse CLI arguments. There is no real-CLI mode; all runs are mock."""
+    ap = argparse.ArgumentParser(
+        description=(
+            "SMOKE-ONLY mock runner. Real evaluation MUST use "
+            "experiments/scripts/eval_runner.ps1."
+        ),
+    )
     ap.add_argument("--prompts", type=Path, default=DEFAULT_PROMPTS)
     ap.add_argument("--models", type=Path, default=DEFAULT_MODELS)
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     ap.add_argument("--num-seeds", type=int, default=3)
-    ap.add_argument("--cli-command", default="copilot")
-    ap.add_argument("--prompt-arg", default="-p")
-    ap.add_argument("--model-arg", default="--model")
-    ap.add_argument("--timeout-sec", type=int, default=600)
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--models-filter", default="", help="Comma-separated cli_ids to run")
     ap.add_argument("--prompts-filter", default="", help="Comma-separated prompt_ids to run")
-    ap.add_argument("--mock", action="store_true", help="Write deterministic fake responses for smoke tests")
     ap.add_argument("--log-file", type=Path, default=None)
     return ap.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the evaluation harness."""
+    """Run the smoke harness. Always mock; never invokes a real CLI."""
     args = parse_args(argv)
     if args.num_seeds < 1:
         raise SystemExit("--num-seeds must be >= 1")
@@ -302,13 +275,12 @@ def main(argv: list[str] | None = None) -> int:
     plan, skipped = build_plan(prompts, models, args.num_seeds, args.out_dir, args.resume)
     total_work = len(prompts) * len(models) * args.num_seeds
 
-    print("=== eval_runner.py ===")
+    print("=== mock_smoke.py (SMOKE-ONLY; canonical runner is eval_runner.ps1) ===")
     print(f"Prompts     : {args.prompts} ({len(prompts)} prompts)")
     print(f"Models      : {args.models} ({len(models)} models)")
     print(f"OutputDir   : {args.out_dir}")
     print(f"NumSeeds    : {args.num_seeds}   TotalWork: {total_work}")
-    print(f"Resume={args.resume}  DryRun={args.dry_run}  Mock={args.mock}")
-    print(f"CLI         : {args.cli_command} {args.prompt_arg} <prompt> {args.model_arg} <model> --no-color")
+    print(f"Resume={args.resume}  DryRun={args.dry_run}  Mock=True (always)")
     print(f"Planned     : {len(plan)} runs ({skipped} skipped via resume)")
 
     if args.dry_run:
@@ -327,7 +299,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     completed = 0
-    failed = 0
     for idx, item in enumerate(plan, start=1):
         prompt = item["prompt"]
         model = item["model"]
@@ -337,42 +308,26 @@ def main(argv: list[str] | None = None) -> int:
         )
         started_at = iso_utc()
         result = invoke_once(
-            cli_command=args.cli_command,
-            prompt_arg=args.prompt_arg,
-            model_arg=args.model_arg,
-            prompt_text=str(prompt.get("prompt_text", "")),
-            cli_id=str(model.get("cli_id", "")),
-            timeout_sec=args.timeout_sec,
-            mock=args.mock,
             work_id=str(item["work_id"]),
             prompt=prompt,
             model=model,
             seed=int(item["seed"]),
         )
         finished_at = iso_utc()
-        record = build_record(item, result, started_at, finished_at, args.cli_command, args.prompt_arg, args.model_arg)
+        record = build_record(item, result, started_at, finished_at)
         write_json(item["out_file"], record)
-        ok = result["exit_code"] == 0 and not result["timed_out"]
-        status = "ok" if ok else ("timeout" if result["timed_out"] else "fail")
-        append_progress(log_file, item, status)
-        if ok:
-            completed += 1
-            print(f"  OK   exit=0 dur={result['duration_sec']}s out={len(result['stdout'])}b")
-        else:
-            failed += 1
-            print(
-                f"  WARN exit={result['exit_code']} timed_out={result['timed_out']} "
-                f"dur={result['duration_sec']}s; record written"
-            )
+        append_progress(log_file, item, "ok")
+        completed += 1
+        print(f"  OK   exit=0 dur={result['duration_sec']}s out={len(result['stdout'])}b")
 
-    print("\n=== Done ===")
+    print("\n=== Done (smoke) ===")
     print(f"Completed   : {completed}")
-    print(f"Failed      : {failed}")
     print(f"Skipped     : {skipped} (resume)")
     print(f"Output dir  : {args.out_dir}")
     print(f"Progress log: {log_file}")
+    print("REMINDER: these are MOCK records. Real evaluation = eval_runner.ps1.")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

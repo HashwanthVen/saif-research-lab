@@ -65,11 +65,14 @@ experiments/
 │   ├── models.json              # 10 GHC models, 8 active
 │   └── prompts_sample.jsonl     # 10 seed prompts (2 × 5 domains) — EXPAND to 200/domain
 ├── scripts/
-│   └── eval_runner.ps1          # ★ deterministic, idempotent, resumable
+│   └── eval_runner.ps1          # ★ CANONICAL — deterministic, idempotent, resumable
 ├── src/
-│   └── aggregate_results.py     # runs/ → responses.csv + by_model.csv + response_stability.csv
+│   ├── aggregate_results.py     # runs/ → responses.csv + by_model.csv + response_stability.csv
+│   └── mock_smoke.py            # SMOKE-ONLY cross-platform mock; never invokes a real CLI
 └── README.md                    # smoke-test + scale-up instructions
 ```
+
+> **Hard constraint (do not relax)**: ALL real model evaluation MUST go through `experiments/scripts/eval_runner.ps1` on the Windows host with the GHC CLI. `experiments/src/mock_smoke.py` exists only for cross-platform CI smoke tests of the work-id / build-plan / resume / record-schema logic — it has no `subprocess` import, writes to `results/smoke_runs/` (not `results/runs/`), and every record it produces is self-tagged with `[MOCK]` and `script_version` starting with `mock_smoke.py`. Any output from `mock_smoke.py` is unfit for the manuscript.
 
 **Determinism contract**:
 - `work_id = SHA256(prompt_id + "\0" + cli_id + "\0" + seed)[:16]`

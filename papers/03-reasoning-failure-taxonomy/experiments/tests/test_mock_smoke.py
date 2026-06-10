@@ -1,6 +1,13 @@
+"""Tests for the SMOKE-ONLY mock runner.
+
+These tests guarantee the smoke harness:
+  - keeps the work_id formula bit-for-bit identical with the PS1 runner,
+  - never invokes a real CLI (no subprocess imports allowed),
+  - writes records that are self-tagged as mock,
+  - supports --resume and filtering semantics.
+"""
 from __future__ import annotations
 
-import csv
 import io
 import json
 import shutil
@@ -14,10 +21,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-import eval_runner  # noqa: E402
+import mock_smoke  # noqa: E402
 
 
-class EvalRunnerTests(unittest.TestCase):
+class MockSmokeTests(unittest.TestCase):
     def setUp(self) -> None:
         self.work = ROOT / ".test_work" / self._testMethodName
         if self.work.exists():
@@ -50,15 +57,24 @@ class EvalRunnerTests(unittest.TestCase):
     def run_main(self, *args: str) -> tuple[int, str]:
         buf = io.StringIO()
         with redirect_stdout(buf):
-            rc = eval_runner.main(list(args))
+            rc = mock_smoke.main(list(args))
         return rc, buf.getvalue()
 
-    def test_work_id_determinism(self) -> None:
+    def test_no_subprocess_import(self) -> None:
+        """The smoke runner must never import subprocess; that would make it
+        possible to invoke a real CLI from this module, which violates the
+        hard constraint that all real evaluation goes through eval_runner.ps1."""
+        src = (SRC / "mock_smoke.py").read_text(encoding="utf-8")
+        self.assertNotIn("import subprocess", src)
+        self.assertNotIn("from subprocess", src)
+
+    def test_work_id_determinism_matches_ps1_formula(self) -> None:
+        """work_id formula must stay bit-for-bit identical with eval_runner.ps1."""
         expected = "6b4370a895a4fc75"
-        self.assertEqual(eval_runner.compute_work_id("med-001", "claude-opus-4.7-high", 0), expected)
+        self.assertEqual(mock_smoke.compute_work_id("med-001", "claude-opus-4.7-high", 0), expected)
         self.assertEqual(
-            eval_runner.compute_work_id("med-001", "claude-opus-4.7-high", 0),
-            eval_runner.compute_work_id("med-001", "claude-opus-4.7-high", 0),
+            mock_smoke.compute_work_id("med-001", "claude-opus-4.7-high", 0),
+            mock_smoke.compute_work_id("med-001", "claude-opus-4.7-high", 0),
         )
 
     def test_dry_run_plan_count(self) -> None:
@@ -74,19 +90,18 @@ class EvalRunnerTests(unittest.TestCase):
         self.assertFalse(self.out_dir.exists())
 
     def test_resume_skips_existing_files(self) -> None:
-        prompts = eval_runner.load_jsonl(self.prompts)
-        models = eval_runner.load_models(self.models)
-        work_id = eval_runner.compute_work_id("p1", "m1", 0)
+        prompts = mock_smoke.load_jsonl(self.prompts)
+        models = mock_smoke.load_models(self.models)
+        work_id = mock_smoke.compute_work_id("p1", "m1", 0)
         self.out_dir.mkdir(parents=True)
         (self.out_dir / f"{work_id}.json").write_text('{"already": true}\n', encoding="utf-8")
-        plan, skipped = eval_runner.build_plan(prompts, models, 1, self.out_dir, resume=True)
+        plan, skipped = mock_smoke.build_plan(prompts, models, 1, self.out_dir, resume=True)
         self.assertEqual(skipped, 1)
         self.assertEqual(len(plan), 3)
         self.assertNotIn(work_id, {item["work_id"] for item in plan})
 
-    def test_mock_writes_complete_valid_record(self) -> None:
+    def test_record_is_self_tagged_as_mock(self) -> None:
         rc, out = self.run_main(
-            "--mock",
             "--prompts", str(self.prompts),
             "--models", str(self.models),
             "--out-dir", str(self.out_dir),
@@ -106,7 +121,11 @@ class EvalRunnerTests(unittest.TestCase):
         self.assertTrue(required.issubset(record.keys()))
         self.assertEqual(record["exit_code"], 0)
         self.assertFalse(record["timed_out"])
+        # Self-tagging contract: any downstream consumer can filter on these markers
+        # to refuse to treat the record as real evidence.
         self.assertTrue(record["response_text"].startswith("[MOCK] "))
+        self.assertIn("mock_smoke.py", record["script_version"])
+        self.assertIn("MOCK", record["cli_invocation"])
         progress = (self.out_dir / "_progress.tsv").read_text(encoding="utf-8").strip().split("\t")
         self.assertEqual(progress[5], "ok")
 
@@ -121,7 +140,6 @@ class EvalRunnerTests(unittest.TestCase):
             "--prompts-filter", "p2",
         )
         self.assertEqual(rc, 0)
-        self.assertIn("Prompts     :", out)
         self.assertIn("(1 prompts)", out)
         self.assertIn("(2 models)", out)
         self.assertIn("Planned     : 4 runs", out)
