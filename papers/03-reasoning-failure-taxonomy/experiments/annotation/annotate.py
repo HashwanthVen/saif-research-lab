@@ -49,7 +49,10 @@ def response_body(row: dict[str, Any]) -> str:
 
 
 def parse_codes(raw: str) -> list[str]:
-    """Parse comma-separated F-codes, allowing blank for no code."""
+    """Parse comma-separated F-codes, allowing blank for no code.
+
+    Duplicate entries are collapsed into a sorted unique list.
+    """
     if not raw.strip():
         return []
     codes = [part.strip().upper() for part in raw.split(",") if part.strip()]

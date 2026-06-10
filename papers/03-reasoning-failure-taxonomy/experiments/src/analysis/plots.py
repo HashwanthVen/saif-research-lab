@@ -59,7 +59,8 @@ def plot_heatmap(rows: list[dict[str, Any]], figures_dir: Path, plt: Any) -> boo
     for y, domain in enumerate(domains):
         for x, model in enumerate(models):
             scores = grouped.get((domain, model), {})
-            dominant = max(F_CODES, key=lambda c: scores.get(c, 0.0)) if scores else ""
+            best_score = max((scores.get(c, 0.0) for c in F_CODES), default=0.0)
+            dominant = max(F_CODES, key=lambda c: scores.get(c, 0.0)) if best_score > 0 else ""
             rect = plt.Rectangle((x, y), 1, 1, facecolor=COLORS.get(dominant, "#eeeeee"), edgecolor="white")
             ax.add_patch(rect)
             label = dominant if dominant else "NA"

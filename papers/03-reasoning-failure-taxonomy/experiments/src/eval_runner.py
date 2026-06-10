@@ -36,7 +36,11 @@ def iso_utc() -> str:
 
 
 def compute_work_id(prompt_id: str, cli_id: str, seed: int) -> str:
-    """Compute first 16 hex chars of SHA256(prompt_id\0cli_id\0seed)."""
+    """Compute first 16 hex chars of SHA256(prompt_id\0cli_id\0seed).
+
+    The seed is interpolated as a decimal string: seed=0 hashes as "0",
+    seed=42 hashes as "42".
+    """
     key = f"{prompt_id}\0{cli_id}\0{seed}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
 
@@ -186,10 +190,9 @@ def invoke_once(
             "timed_out": True,
             "duration_sec": round(time.monotonic() - started, 3),
         }
-    except Exception as exc:
-        # Robustness is intentional: the runner must persist a record for every
-        # work item, including local invocation failures, so --resume cannot
-        # retry the same broken tuple forever.
+    except (OSError, ValueError, RuntimeError) as exc:
+        # Robustness is intentional: the runner must persist a record for local
+        # invocation failures so --resume cannot retry a broken tuple forever.
         return {
             "stdout": "",
             "stderr": f"{type(exc).__name__}: {exc}",

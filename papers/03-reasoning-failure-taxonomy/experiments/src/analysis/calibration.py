@@ -1,9 +1,11 @@
 """Compute confidence calibration ECE per (cli_id, domain).
 
 Confidence extraction contract: search response_text for a line matching
-`CONFIDENCE: <x>` (case-insensitive). Values in [0, 1] are used directly;
-values in (1, 100] are interpreted as percentages and divided by 100. If no
-line is present or the value is outside range, confidence is NaN and skipped.
+`CONFIDENCE: <x>` (case-insensitive). The first matching line is used. Values
+in [0, 1] are used directly; values in (1, 100] are interpreted as percentages
+and divided by 100. Negative values and scientific notation are not accepted by
+the regex. If no valid line is present or the value is outside range, confidence
+is NaN and skipped.
 Correctness proxy: an annotated response with no F-codes is treated as correct;
 any F-code means incorrect/failed. This script does not infer correctness from
 model text.
