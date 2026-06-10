@@ -137,7 +137,7 @@ def main() -> int:
 
     try:
         import matplotlib.pyplot as plt  # type: ignore
-    except Exception as exc:
+    except ImportError as exc:
         print(f"TODO: matplotlib unavailable ({exc}); skipping plots.")
         return 0
 

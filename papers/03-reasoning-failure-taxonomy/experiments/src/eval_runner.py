@@ -186,7 +186,10 @@ def invoke_once(
             "timed_out": True,
             "duration_sec": round(time.monotonic() - started, 3),
         }
-    except Exception as exc:  # still persist a record for this work item
+    except Exception as exc:
+        # Robustness is intentional: the runner must persist a record for every
+        # work item, including local invocation failures, so --resume cannot
+        # retry the same broken tuple forever.
         return {
             "stdout": "",
             "stderr": f"{type(exc).__name__}: {exc}",
@@ -262,7 +265,7 @@ def append_progress(log_file: Path, item: dict[str, Any], status: str) -> None:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments."""
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(description="Deterministic cross-platform Copilot CLI evaluation runner.")
     ap.add_argument("--prompts", type=Path, default=DEFAULT_PROMPTS)
     ap.add_argument("--models", type=Path, default=DEFAULT_MODELS)
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)

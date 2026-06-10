@@ -84,25 +84,36 @@ Use this rubric only for evaluation outputs. It is not medical, legal, nuclear, 
 
 ## One-page decision flow chart
 
+This is a compact operational overview; use the per-code decision trees above for final tie-breaking.
+
 ```text
-Start
+Start with one response + prompt + answer key
   |
   v
-Is the response correct and complete relative to prompt/answer key?
-  |-- Yes --> Does it include invented consequential facts?
-  |             |-- Yes --> F1
-  |             |-- No  --> No F-code
+A. Does the final answer satisfy the requested format and core answer key?
+  |-- Yes -------------------------------------------------------------+
+  |                                                                   |
+  |-- No --> Mark the response as faulty, then continue through B-E.   |
+                                                                      v
+B. Check every concrete fact, citation, number, source, and condition.
+  |-- Not in prompt/answer key and consequential? --> add F1
+  |-- Verifiable or harmless background? ------------> no F1
   |
-  |-- No --> For each problem observed:
-            |
-            |-- Invented concrete fact/citation/number/detail? --> F1
-            |
-            |-- Stock template overrides prompt-specific constraint? --> F2
-            |
-            |-- Critical prompt detail omitted, contradicted, or unused? --> F3
-            |
-            |-- High stated confidence (>=0.80 or strong certainty) in faulty answer? --> F4
-            |
-            v
-          Multiple codes allowed; add notes for ambiguous or missing-confidence cases.
+  v
+C. Check whether the answer is a generic domain template.
+  |-- Template ignores an explicit constraint/exception? --> add F2
+  |-- Template is appropriate for the prompt? -----------> no F2
+  |
+  v
+D. Check required prompt details one by one.
+  |-- Critical detail omitted/contradicted/unused? --> add F3
+  |-- Detail reflected in answer, even if not repeated? -> no F3
+  |
+  v
+E. Check confidence only after judging correctness.
+  |-- Faulty answer + CONFIDENCE >= 0.80/80%/4 of 5 or strong certainty? --> add F4
+  |-- Correct answer, low confidence, or no confidence statement? ---------> no F4
+  |
+  v
+Record all assigned F-codes, plus notes for ambiguity, missing confidence, or evidence needed.
 ```
