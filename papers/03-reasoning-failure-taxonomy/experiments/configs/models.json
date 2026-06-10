@@ -1,0 +1,16 @@
+{
+  "$schema": "models.schema.json",
+  "models": [
+    {"cli_id": "claude-opus-4.8",          "display": "Claude Opus 4.8",                   "tier": "frontier",  "thinking": true,  "include": true},
+    {"cli_id": "claude-opus-4.7-xhigh",    "display": "Claude Opus 4.7 (xHigh reasoning)", "tier": "frontier",  "thinking": true,  "include": true},
+    {"cli_id": "claude-opus-4.7-high",     "display": "Claude Opus 4.7 (High reasoning)",  "tier": "frontier",  "thinking": true,  "include": true},
+    {"cli_id": "claude-opus-4.7",          "display": "Claude Opus 4.7",                   "tier": "frontier",  "thinking": false, "include": true},
+    {"cli_id": "claude-sonnet-4.6",        "display": "Claude Sonnet 4.6",                 "tier": "mid",       "thinking": false, "include": true},
+    {"cli_id": "gpt-5.5",                  "display": "GPT-5.5",                           "tier": "frontier",  "thinking": true,  "include": true},
+    {"cli_id": "gpt-5.4",                  "display": "GPT-5.4",                           "tier": "frontier",  "thinking": false, "include": true},
+    {"cli_id": "gemini-3.1-pro-preview",   "display": "Gemini 3.1 Pro",                    "tier": "frontier",  "thinking": true,  "include": true},
+    {"cli_id": "gemini-3.5-flash",         "display": "Gemini 3.5 Flash",                  "tier": "mid",       "thinking": false, "include": false},
+    {"cli_id": "claude-haiku-4.5",         "display": "Claude Haiku 4.5",                  "tier": "small",     "thinking": false, "include": false}
+  ],
+  "_notes": "Set include=true to use in the eval run. Standard 8-model matrix: 4 reasoning-capable + 4 non-reasoning baselines. Last 2 included as optional cheap-tier comparators."
+}

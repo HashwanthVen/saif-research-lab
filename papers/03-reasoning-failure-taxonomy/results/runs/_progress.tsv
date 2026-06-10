@@ -1,0 +1,65 @@
+2026-06-10T22:00:02.258Z	=== eval_runner.ps1 ===
+2026-06-10T22:00:02.293Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (0 prompts)
+2026-06-10T22:00:02.344Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (0 models)
+2026-06-10T22:00:02.377Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:00:02.413Z	NumSeeds    : 3   TotalWork: 0
+2026-06-10T22:00:02.447Z	Resume=False  DryRun=True
+2026-06-10T22:00:02.480Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:00:02.603Z	Planned     : 0 runs (0 skipped via resume)
+2026-06-10T22:00:02.667Z	DryRun complete.
+2026-06-10T22:00:47.938Z	=== eval_runner.ps1 ===
+2026-06-10T22:00:48.041Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (0 prompts)
+2026-06-10T22:00:48.074Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (0 models)
+2026-06-10T22:00:48.160Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:00:48.220Z	NumSeeds    : 3   TotalWork: 0
+2026-06-10T22:00:48.416Z	Resume=False  DryRun=True
+2026-06-10T22:00:48.459Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:00:48.551Z	Planned     : 0 runs (0 skipped via resume)
+2026-06-10T22:00:48.585Z	DryRun complete.
+2026-06-10T22:01:39.590Z	=== eval_runner.ps1 ===
+2026-06-10T22:01:39.695Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (1 prompts)
+2026-06-10T22:01:39.714Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (1 models)
+2026-06-10T22:01:39.764Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:01:39.831Z	NumSeeds    : 3   TotalWork: 3
+2026-06-10T22:01:39.951Z	Resume=False  DryRun=True
+2026-06-10T22:01:40.022Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:01:41.165Z	Planned     : 3 runs (0 skipped via resume)
+2026-06-10T22:01:41.376Z	DRYRUN  eadb6c511e574df8                                                                seed=0
+2026-06-10T22:01:41.793Z	DRYRUN  b3ec6b59939f6ff2                                                                seed=1
+2026-06-10T22:01:41.901Z	DRYRUN  ee94d4fdbb37914c                                                                seed=2
+2026-06-10T22:01:42.018Z	DryRun complete.
+2026-06-10T22:02:39.140Z	=== eval_runner.ps1 ===
+2026-06-10T22:02:39.182Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (10 prompts)
+2026-06-10T22:02:39.231Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (8 models)
+2026-06-10T22:02:39.282Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:02:39.327Z	NumSeeds    : 3   TotalWork: 240
+2026-06-10T22:02:39.360Z	Resume=False  DryRun=True
+2026-06-10T22:02:39.414Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:02:40.301Z	Planned     : 240 runs (0 skipped via resume)
+2026-06-10T22:02:40.354Z	DRYRUN  a12d4b7a28670640  med-001                        claude-opus-4.8                seed=0
+2026-06-10T22:02:40.432Z	DRYRUN  4ac066a5f146e665  med-001                        claude-opus-4.8                seed=1
+2026-06-10T22:02:40.529Z	DRYRUN  5fe75726e4413104  med-001                        claude-opus-4.8                seed=2
+2026-06-10T22:02:40.699Z	DRYRUN  6ce78ca090bd0686  med-001                        claude-opus-4.7-xhigh          seed=0
+2026-06-10T22:02:40.867Z	DRYRUN  50eadf9d36032c4c  med-001                        claude-opus-4.7-xhigh          seed=1
+2026-06-10T22:02:41.004Z	  (... 235 more)
+2026-06-10T22:02:41.121Z	DryRun complete.
+2026-06-10T22:02:55.318Z	=== eval_runner.ps1 ===
+2026-06-10T22:02:55.400Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (1 prompts)
+2026-06-10T22:02:56.064Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (1 models)
+2026-06-10T22:02:56.221Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:02:56.766Z	NumSeeds    : 1   TotalWork: 1
+2026-06-10T22:02:57.107Z	Resume=False  DryRun=False
+2026-06-10T22:02:57.222Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:02:57.601Z	CLIPath     : c:\Users\v-sutharapuh\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli\copilot.ps1
+2026-06-10T22:02:58.131Z	Planned     : 1 runs (0 skipped via resume)
+2026-06-10T22:02:58.723Z	[1/1] 1672255112d2c547  med-002                    claude-opus-4.7-high           seed=0 ...
+2026-06-10T22:03:33.963Z	=== eval_runner.ps1 ===
+2026-06-10T22:03:34.024Z	PromptsFile : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\prompts_sample.jsonl  (1 prompts)
+2026-06-10T22:03:34.065Z	ModelsFile  : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\configs\models.json   (1 models)
+2026-06-10T22:03:34.113Z	OutputDir   : C:\Users\v-sutharapuh\OneDrive - Microsoft\Desktop\AI\saif-research-lab\papers\03-reasoning-failure-taxonomy\experiments\scripts\..\..\results\runs
+2026-06-10T22:03:34.171Z	NumSeeds    : 1   TotalWork: 1
+2026-06-10T22:03:34.227Z	Resume=False  DryRun=False
+2026-06-10T22:03:34.287Z	CLI         : copilot -p <prompt> --model <model>
+2026-06-10T22:03:34.547Z	CLIPath     : c:\Users\v-sutharapuh\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli\copilot.ps1
+2026-06-10T22:03:35.190Z	Planned     : 1 runs (0 skipped via resume)
+2026-06-10T22:03:35.252Z	[1/1] 1672255112d2c547  med-002                    claude-opus-4.7-high           seed=0 ...
