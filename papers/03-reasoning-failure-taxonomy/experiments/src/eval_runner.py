@@ -111,6 +111,13 @@ def make_cli_args(cli_command: str, prompt_arg: str, prompt_text: str, model_arg
     return [*shlex.split(cli_command), prompt_arg, prompt_text, model_arg, cli_id, "--no-color"]
 
 
+def decode_output(data: bytes | str | None) -> str:
+    """Decode subprocess output that may be bytes, text, or None."""
+    if isinstance(data, bytes):
+        return data.decode("utf-8", errors="replace")
+    return data or ""
+
+
 def mock_response(work_id: str, prompt: dict[str, Any], model: dict[str, Any], seed: int) -> str:
     """Return a clearly fake deterministic response for smoke tests."""
     digest = hashlib.sha256(
@@ -170,9 +177,8 @@ def invoke_once(
             "duration_sec": round(time.monotonic() - started, 3),
         }
     except subprocess.TimeoutExpired as exc:
-        stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
-        stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
-        stderr = (stderr + f"\nTIMEOUT after {timeout_sec} s").strip()
+        stdout = decode_output(exc.stdout)
+        stderr = (decode_output(exc.stderr) + f"\nTIMEOUT after {timeout_sec} s").strip()
         return {
             "stdout": stdout,
             "stderr": stderr,
