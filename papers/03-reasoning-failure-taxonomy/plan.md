@@ -11,7 +11,7 @@
 - [ ] Curate **FSAR-Argue** from public NRC ADAMS FSAR excerpts (target: 200 argument-completeness items)
 - [ ] Curate **EDGAR-Q** from SEC 10-K/10-Q risk-factor sections post-2024-cutoff (target: 200 items)
 - [ ] Annotator-agreement pilot: 20 items × 2 annotators on each benchmark → require κ ≥ 0.7 on the **primary** F-code (see § Annotation rubric)
-- [ ] Prompt-leakage check: for each of the 1,000 prompts, compute a SHA256 of the normalized prompt text and grep public dump indices (Common Crawl, OpenWebText2, RedPajama). Any prompt with an exact hash match in a known training corpus is flagged and replaced.
+- [ ] Prompt-leakage check: normalize each of the 1,000 prompts (NFKC unicode normalization, lowercase, collapse all whitespace to single ASCII spaces, strip leading/trailing whitespace), compute SHA256 of the normalized text, and check the hash against public training-corpus indices (Common Crawl CDX, OpenWebText2 dumps, RedPajama-V2 manifest, The Pile shards). Any prompt with an exact hash match is flagged and replaced with a freshly authored variant; the replacement is re-run through the same check. Estimated effort: ~4 hours (one-time index download + one Python pass).
 
 ## Phase 2: Model evaluation (week 2)
 
@@ -138,7 +138,7 @@ Compute is **$0** because all model calls go through the GHC Copilot CLI on the 
 | Phase | Wall-time | Cost |
 |-------|-----------|------|
 | Benchmark curation + prompt-leakage check | 1 wk | $0 |
-| GHC CLI runs (24,000 main + 18,000 position-ablation = 42,000 runs via `eval_runner.ps1`) | 1–2 wk | $0 |
+| GHC CLI runs (24,000 main + 18,000 position-ablation = 42,000 runs via `eval_runner.ps1`; assumes ~30 s/run wall-time per HANDOFF.md, 4-way parallel = ~9 days serial-equivalent, plus 20% headroom for retries and resume cycles) | 1–2 wk | $0 |
 | Annotation (pilot + full corpus + adjudication) | 2 wk | $0 (solo+partner) or $500 (Prolific) |
 | Analysis + figures | 1 wk | $0 |
 | Manuscript | 1 wk | $0 |

@@ -68,6 +68,23 @@ class MockSmokeTests(unittest.TestCase):
         self.assertNotIn("import subprocess", src)
         self.assertNotIn("from subprocess", src)
 
+    def test_no_network_imports(self) -> None:
+        """The smoke runner must not import any networking module. The module
+        docstring promises 'no network access'; this regression test enforces
+        it so the smoke harness cannot quietly grow a path that exfiltrates
+        prompts to an HTTP endpoint."""
+        src = (SRC / "mock_smoke.py").read_text(encoding="utf-8")
+        forbidden = [
+            "import requests", "from requests",
+            "import urllib", "from urllib",
+            "import http", "from http",
+            "import httpx", "from httpx",
+            "import socket as ", "from socket import",  # socket.gethostname() is the only allowed use; star-imports / aliased imports are not
+            "import aiohttp", "from aiohttp",
+        ]
+        for needle in forbidden:
+            self.assertNotIn(needle, src, f"Forbidden network import detected: {needle!r}")
+
     def test_work_id_determinism_matches_ps1_formula(self) -> None:
         """work_id formula must stay bit-for-bit identical with eval_runner.ps1."""
         expected = "6b4370a895a4fc75"
