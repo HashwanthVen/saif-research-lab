@@ -117,3 +117,55 @@ After `responses.csv` exists, 2 human annotators code each failed response into 
 ## Cost note
 
 Running against GHC CLI is effectively **$0** for the user (subsumed by GHC seat license). If you ever swap to direct API access, estimated cost for full matrix = ~$1,500-2,000 at 2026 token prices.
+
+## Cross-platform (Python) runner
+
+Linux/macOS users should use the stdlib-only Python runner. It preserves the same determinism contract as `scripts/eval_runner.ps1`: `work_id = first16hex(SHA256(prompt_id + \0 + cli_id + \0 + seed))`, one JSON record per run, resumable outputs, and `_progress.tsv` logging.
+
+```bash
+# From papers/03-reasoning-failure-taxonomy/experiments
+python -m src.eval_runner --dry-run
+
+# Smoke-test the full pipeline without calling a real CLI.
+python -m src.eval_runner --mock --num-seeds 2 \
+  --prompts configs/prompts_sample.jsonl \
+  --models configs/models.json \
+  --out-dir ../results/runs
+
+# Full sample matrix: 10 prompts × included models × 3 seeds.
+python -m src.eval_runner --resume \
+  --prompts configs/prompts_sample.jsonl \
+  --models configs/models.json \
+  --out-dir ../results/runs
+
+# Optional narrowing.
+python -m src.eval_runner --mock --num-seeds 1 \
+  --models-filter claude-opus-4.7-high \
+  --prompts-filter med-001
+```
+
+Use `--cli-command`, `--prompt-arg`, and `--model-arg` if the local CLI wrapper differs from `copilot -p <prompt> --model <cli_id> --no-color`. `--mock` outputs always begin with `[MOCK]` and must never be treated as real evaluation results.
+
+## Annotation pipeline
+
+After aggregation creates `results/tables/responses.csv`, read `annotation/rubric.md` and run:
+
+```bash
+python annotation/annotate.py --annotator annotator_a --resume
+python annotation/annotate.py --annotator annotator_b --resume --filter-domain medicine
+```
+
+Each annotator writes `annotations/<annotator>.jsonl` with `work_id`, `f_codes`, and optional `notes`.
+
+## Analysis pipeline
+
+Run these scripts after annotations exist:
+
+```bash
+python src/analysis/cohens_kappa.py annotations/annotator_a.jsonl annotations/annotator_b.jsonl --write
+python src/analysis/failure_modes.py
+python src/analysis/calibration.py
+python src/analysis/plots.py
+```
+
+`cohens_kappa.py`, `failure_modes.py`, and `calibration.py` are stdlib-only. `plots.py` requires matplotlib (the only non-stdlib dependency) and writes `figures/failure_mode_heatmap.{pdf,png}` and `figures/calibration_curves.{pdf,png}` when the input tables are populated.

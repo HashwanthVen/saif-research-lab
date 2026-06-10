@@ -68,7 +68,7 @@ def write_responses_csv(runs: list[dict], out: Path) -> None:
     cols = [
         "work_id", "prompt_id", "domain", "difficulty", "cli_id", "display",
         "tier", "thinking", "seed", "exit_code", "timed_out", "duration_sec",
-        "response_chars", "extracted_answer", "started_at",
+        "response_chars", "response_text", "extracted_answer", "started_at",
     ]
     with out.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
@@ -89,6 +89,7 @@ def write_responses_csv(runs: list[dict], out: Path) -> None:
                 "timed_out": r.get("timed_out"),
                 "duration_sec": r.get("duration_sec"),
                 "response_chars": len(r.get("response_text") or ""),
+                "response_text": r.get("response_text") or "",
                 "extracted_answer": ans,
                 "started_at": r.get("started_at"),
             })
