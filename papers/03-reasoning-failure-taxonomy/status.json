@@ -1,17 +1,27 @@
 {
   "paper_id": "03-reasoning-failure-taxonomy",
   "phase": "literature_review",
-  "last_updated": "2026-06-10T21:30:00Z",
+  "last_updated": "2026-06-10T23:06:00Z",
   "target_venue": "ICLR 2027 Evaluation track",
   "target_deadline": "2026-09-19",
   "next_actions": [
-    "Researcher: pull Kim 2025 M-ARC, Heyman-Zylberberg 2025 graph hallucination, recent 2026 reasoning-model failure papers",
-    "Researcher: confirm no cross-domain failure taxonomy paper has appeared since Jun 2026",
-    "Critic: review plan.md before any API spending",
-    "Senior-reviewer: Checkpoint A before scaling API runs beyond $200"
+    "Critic: re-review revised plan.md (Phase 0c) -- must clear at least 'minor revision'; log to reviews/critic-plan-<date>-v2.md",
+    "Senior-reviewer: Checkpoint A (Phase 0d) on cleaned plan -- gate before any GHC CLI scaling; must explicitly approve (i) F-code rubric, (ii) prompt-set design, (iii) determinism contract, (iv) statistical analysis plan",
+    "Researcher (Phase 1a, after 0d clears): pull Kim 2025 M-ARC, Heyman-Zylberberg 2025 graph hallucination, all 2026 reasoning-model failure papers; output literature/related-work.md",
+    "arXiv-scout (Phase 1b): fresh scoop check; halt if cross-domain failure-taxonomy overlap > 60%",
+    "Critic (Phase 1c): review related-work coverage for missing safety-team work (Anthropic / OpenAI / Apollo / METR / ARC Evals)"
   ],
-  "blockers": [],
+  "blockers": [
+    "Phase 0c critic re-review on revised plan.md and PAPER_BRIEF.md F-codes must complete before phase advances to plan_critique -> senior_review_plan",
+    "Phase 0d senior-reviewer Checkpoint A must approve before any phase advances to experimentation"
+  ],
   "scoop_alerts": [],
+  "phase_0_status": {
+    "0a_eval_runner_hygiene": "complete -- eval_runner.py renamed to mock_smoke.py (smoke-only, no subprocess import, regression test added); HANDOFF.md re-affirms eval_runner.ps1 as canonical; 6 unittests green",
+    "0b_rubric_repair": "complete -- F1-F4 rewritten with mutually-exclusive primary-code rule (precedence F1->F3->F2->F4), secondary codes documented, decision tree in plan.md, 4 worked examples (one per domain), 3 ambiguous-case adjudications, long-context position ablation added (Phase 2b), inter-annotator protocol formalized (kappa>=0.7 hard gate, F0 unclassifiable exclusion bucket, blinded coding)",
+    "0c_critic_rereview": "pending -- requires critic agent dispatch",
+    "0d_senior_reviewer_checkpoint_A": "pending -- requires senior-reviewer agent dispatch after 0c clears"
+  },
   "scores": {
     "novelty": 9,
     "genuine_value": 10,
@@ -26,7 +36,7 @@
     "demand_signal_strength": 9,
     "cross_vertical_novelty": 8,
     "real_world_impact": 9,
-    "weighted_total": 8.70,
+    "weighted_total": 8.7,
     "last_scored": "2026-06-10T21:30:00Z"
   }
 }

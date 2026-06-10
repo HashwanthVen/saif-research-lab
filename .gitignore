@@ -14,6 +14,7 @@ papers/*/results/runs/**/*.safetensors
 # Build artifacts
 *.aux
 *.log
+!papers/*/orchestrator.log
 *.out
 *.bbl
 *.blg

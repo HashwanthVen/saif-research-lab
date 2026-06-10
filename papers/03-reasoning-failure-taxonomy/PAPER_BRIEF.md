@@ -27,13 +27,20 @@ Reasoning models (o1, o3-mini, DeepSeek-R1, Claude 3.7 Sonnet Thinking, Gemini 2
 | Financial Audit | EDGAR-Q (we curate from SEC 10-K/10-Q risk factor sections) | sec.gov/edgar | Public domain |
 | Journalism | ClaimBuster | idir.uta.edu/claimbuster | CC BY-NC 4.0 |
 
-### Failure taxonomy (4 codes)
-1. **F1 — Feature Hallucination**: model asserts a fact not present in the prompt
-2. **F2 — Pattern Rigidity**: model applies a stereotyped template inappropriately
-3. **F3 — Context Compression**: model loses information embedded earlier in the prompt
-4. **F4 — Confidence Miscalibration**: high stated confidence on incorrect answers
+### Failure taxonomy (4 codes, mutually-exclusive **primary**, additive **secondary**)
 
-Each failed response is coded with one or more F-codes by 2 independent annotators (Cohen's κ ≥ 0.7 required).
+Every wrong response receives **exactly one primary F-code** plus an optional set of secondary F-codes. Co-occurrence is expected; the primary code is the *proximate* cause of the wrong answer per the decision tree in `plan.md` § Annotation rubric.
+
+1. **F1 — Feature Hallucination (primary when):** the response contains at least one declarative claim about a named entity, number, date, citation, or rule that is **not entailed by the prompt** and is **false against the ground-truth source**. Operational test: blank the model's reasoning trace; can the wrong final answer be traced to a fabricated factual token? If yes → F1.
+2. **F2 — Pattern Rigidity (primary when):** all asserted facts are individually defensible from the prompt, but the response **applies a template / formula / heuristic that does not fit the question** (e.g., applies a guideline meant for adult patients to a pediatric case explicitly flagged as pediatric). Operational test: is the wrong answer the *right* answer to a *different, more common* question? If yes → F2.
+3. **F3 — Context Compression (primary when):** the wrong answer would have been correct if a specific token-span present in the prompt had been used, and the response does not reference that span. Operational test: can the failure be reproduced by deleting only that span? Tested directly via the **long-context position ablation** in `plan.md` § Phase 2b.
+4. **F4 — Confidence Miscalibration (primary when):** the response is wrong **and** the model's self-reported confidence is in the top quartile (≥ 0.75 on the 0–1 scale or ≥ 4 on the 1–5 scale) **and** none of F1/F2/F3 apply. F4 is also recorded as a **secondary** code on every wrong response with top-quartile confidence; the **H3 calibration analysis uses the secondary-code distribution**, not the primary.
+
+**Primary-code precedence (used when more than one rule fires):** F1 → F3 → F2 → F4. Rationale: fabricated facts (F1) are the most reviewer-visible failure; missed context (F3) is the next most diagnostic; rigidity (F2) only applies when the facts are right; F4 is the residual.
+
+**Inter-annotator protocol:** 2 annotators, blinded to model identity, code every response independently. Cohen's κ on the primary code computed on a 20% overlap sample; **κ ≥ 0.7 is required** before the full corpus is coded. Disagreements adjudicated by a third pass with both annotators present; if no consensus, the item is marked **F0 — unclassifiable** and excluded from H1/H2 statistics (reported as a denominator in Limitations).
+
+Worked examples and ambiguous-case adjudication are documented in full in `plan.md` § Annotation rubric.
 
 ### Methodology
 1. Sample 200 instances per domain (1,000 total per model; 5,000 total responses)
